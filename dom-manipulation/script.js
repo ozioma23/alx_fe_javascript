@@ -53,4 +53,8 @@ function addQuote() {
 window.onload = function() {
     // Display a random quote when the page loads
     showRandomQuote();
-};
+
+
+     // Attach event listener to the "Show New Quote" button
+     document.getElementById('newQuote').addEventListener('click', showRandomQuote);
+    };
