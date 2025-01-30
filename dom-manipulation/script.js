@@ -1,11 +1,18 @@
 // Array of quote objects
-const quotes = [
+const defaultQuotes = [
     { text: "The best way to predict the future is to create it.", category: "Motivation" },
     { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", category: "Perseverance" },
     { text: "Believe you can and you're halfway there.", category: "Belief" },
     { text: "Your time is limited, so don’t waste it living someone else’s life.", category: "Time" },
     { text: "It always seems impossible until it’s done.", category: "Inspiration" },
 ];
+
+const quotes = JSON.parse(localStorage.getItem('quotes')) || defaultQuotes;
+
+// Function to save quotes to local storage
+function saveQuotesToLocalStorage() {
+    localStorage.setItem('quotes', JSON.stringify(quotes));
+}
 
 // Function to display a random quote
 function showRandomQuote() {
@@ -15,7 +22,12 @@ function showRandomQuote() {
     const quoteDisplay = document.getElementById('quoteDisplay'); // Get the div to display the quote
 
     // Set the HTML content of the quoteDisplay div
+    if (quoteDisplay) {
     quoteDisplay.innerHTML = `<p>"${randomQuote.text}"</p><p><em>- ${randomQuote.category}</em></p>`;
+}
+
+// Store the last viewed quote in session storage
+sessionStorage.setItem('lastViewedQuote', JSON.stringify(randomQuote));
 }
 
 // Function to create the "Add Quote" form dynamically
@@ -48,7 +60,7 @@ function createAddQuoteForm() {
     document.body.appendChild(formContainer);
 }
 
-// Function to add the new quote to the quotes array
+// Function to add the new quote to the array
 function addQuote() {
     const newQuoteText = document.getElementById('newQuoteText').value.trim();
     const newQuoteCategory = document.getElementById('newQuoteCategory').value.trim();
@@ -57,6 +69,7 @@ function addQuote() {
     if (newQuoteText && newQuoteCategory) {
         // Create a new quote object
         const newQuote = { text: newQuoteText, category: newQuoteCategory };
+        saveQuotesToLocalStorage(); // Save updated quotes to local storage
 
         // Add the new quote to the quotes array
         quotes.push(newQuote);
@@ -74,6 +87,48 @@ function addQuote() {
         // Show an error message if fields are empty
         alert("Please fill in both fields.");
     }
+}
+
+// Function to export quotes as a JSON file
+function exportQuotesAsJSON() {
+    const jsonData = JSON.stringify(quotes, null, 2); // Convert the quotes array to a JSON string
+    
+    const blob = new Blob([jsonData], { type: 'application/json' }); // Create a Blob object
+    const url = URL.createObjectURL(blob); // Create a download link URL
+    
+    const link = document.createElement('a'); // Create an anchor element (link)
+    link.href = url; // Set the link's href to the Blob URL
+    link.download = 'quotes.json'; // Set the download file name
+    link.click(); // Trigger the download by simulating a click
+    
+    // Clean up the object URL
+    URL.revokeObjectURL(url);
+}
+
+// Function to import quotes from a JSON file
+function importFromJsonFile(event) {
+    const fileReader = new FileReader();
+    
+    fileReader.onload = function(event) {
+        try {
+            const importedQuotes = JSON.parse(event.target.result); // Parse the uploaded JSON file
+            
+            // Validate the structure of the imported data (ensure it's an array of quotes)
+            if (Array.isArray(importedQuotes)) {
+                quotes.push(...importedQuotes); // Add imported quotes to the current quotes array
+                saveQuotes(); // Save updated quotes to local storage
+                showRandomQuote(); // Optionally, display a random quote after import
+                
+                alert('Quotes imported successfully!');
+            } else {
+                alert('The uploaded file is not a valid quotes JSON file.');
+            }
+        } catch (error) {
+            alert('Error parsing the JSON file. Please ensure it is a valid JSON file.');
+        }
+    };
+    
+    fileReader.readAsText(event.target.files[0]); // Read the file as text
 }
 
 // Step 4: Initialize the app
