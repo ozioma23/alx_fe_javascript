@@ -344,6 +344,9 @@ async function fetchQuoteFromServer() {
         // Log the result (or handle it as needed)
         console.log("Posted quote:", result);
 
+          // Log message after successfully syncing with the server
+          console.log("Quotes synced with server!");  // This logs the success message
+          
         // Check for conflicts with existing quotes
         const existingQuoteIndex = quotes.findIndex(q => q.text === quoteData.text);
 
