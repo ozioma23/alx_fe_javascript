@@ -69,13 +69,29 @@ function addQuote() {
     if (newQuoteText && newQuoteCategory) {
         // Create a new quote object
         const newQuote = { text: newQuoteText, category: newQuoteCategory };
-        saveQuotesToLocalStorage(); // Save updated quotes to local storage
 
-        // Add the new quote to the quotes array
-        quotes.push(newQuote);
+        // Check for conflicts by comparing the quote with existing ones
+        const existingQuoteIndex = quotes.findIndex(q => q.text === newQuote.text);
 
-        // Display the new quote
-        showRandomQuote();
+        if (existingQuoteIndex === -1) {
+            // If no conflict (new quote), add it to the quotes array
+            quotes.push(newQuote);
+            saveQuotesToLocalStorage(); // Save updated quotes to local storage
+            showRandomQuote(); // Optionally, display the new quote immediately
+            showNotification("New quote added successfully!", "success");
+        } else {
+            // If there is a conflict (duplicate quote), notify the user
+            const userResponse = confirm("This quote already exists. Do you want to overwrite it?");
+            if (userResponse) {
+                // If user agrees, overwrite the quote
+                quotes[existingQuoteIndex] = newQuote;
+                saveQuotesToLocalStorage();
+                showRandomQuote(); // Optionally, display the updated quote
+                showNotification("Quote updated successfully!", "success");
+            } else {
+                showNotification("Conflict resolved: Quote not added.", "info");
+            }
+        }
 
         // Clear the input fields after adding the quote
         document.getElementById("newQuoteText").value = "";
@@ -209,6 +225,30 @@ function populateCategories() {
         categorySelect.addEventListener('change', filterQuotes);
     }
 }
+// Function to display a notification
+function showNotification(message, type) {
+    const notificationContainer = document.getElementById('notificationContainer');
+    
+    // If notification container doesn't exist, create it
+    if (!notificationContainer) {
+        const newContainer = document.createElement('div');
+        newContainer.id = 'notificationContainer';
+        document.body.appendChild(newContainer);
+    }
+
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    const notificationContainerElement = document.getElementById('notificationContainer');
+    notificationContainerElement.appendChild(notification);
+
+    // Automatically hide the notification after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
 
 // Function to filter quotes based on the selected category
 function filterQuotes() {
@@ -244,8 +284,36 @@ function displayQuote(quote) {
         quoteDisplay.innerHTML = `<p>"${quote.text}"</p><p><em>- ${quote.category}</em></p>`;
     }
 }
+// Simulate server interaction (fetch and post data)
 
-// Step 4: Initialize the app
+// Fetch random quote from a simulated server (JSONPlaceholder or similar)
+function fetchQuoteFromServer() {
+    // Simulating a delay in fetching data from the server
+    setTimeout(() => {
+        // Simulate fetching a new quote from an external API (e.g., JSONPlaceholder)
+        const simulatedQuote = { text: "New quote fetched from server.", category: "Server" };
+        
+          // Check for conflicts by comparing the quote with existing ones
+          const existingQuoteIndex = quotes.findIndex(q => q.text === simulatedQuote.text);
+
+          if (existingQuoteIndex === -1) { 
+              // If no conflict (new quote), add it to the quotes array
+              quotes.push(simulatedQuote);
+          } else {
+              // If there is a conflict (duplicate quote), prioritize the server's data
+              quotes[existingQuoteIndex] = simulatedQuote;
+          }
+// Save updated quotes to local storage
+        saveQuotesToLocalStorage();
+        showRandomQuote();
+    }, 2000); // Delay of 2 seconds for fetching
+}
+
+// Periodic data fetching simulation
+setInterval(fetchQuoteFromServer, 10000); // Fetch new quote every 10 seconds
+
+
+// Initialize the app
 window.onload = function() {
     // Display a random quote when the page loads
     showRandomQuote();
@@ -263,4 +331,6 @@ window.onload = function() {
     if (newQuoteButton) {
         newQuoteButton.addEventListener('click', showRandomQuote);
     }
+     // Start periodic server syncing
+     setInterval(fetchQuoteFromServer, 10000); // Fetch new quote every 10 seconds
 };
