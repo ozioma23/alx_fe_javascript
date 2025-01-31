@@ -319,38 +319,40 @@ function filterQuotes() {
     }
 }
 
-// Function to fetch quotes from an external API (using async/await)
+// Function to fetch quotes from an external API (using async/await) with POST method
 async function fetchQuoteFromServer() {
     try {
-        // Fetch data from the API
-        const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+        const quoteData = { text: "New quote fetched from server.", category: "Server" }; // Example data to post
         
+        // Use the POST method with headers
+        const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+            method: "POST",  // Specify that this is a POST request
+            headers: {
+                "Content-Type": "application/json",  // Set the content type to JSON
+            },
+            body: JSON.stringify(quoteData),  // Stringify the data to send in the body
+        });
+
         // Check if the response is okay
         if (!response.ok) {
             throw new Error("Failed to fetch quotes");
         }
 
         // Parse the response as JSON
-        const posts = await response.json();
+        const result = await response.json();
 
-        // Simulate a random selection of a post to display as a quote
-        const randomPost = posts[Math.floor(Math.random() * posts.length)];
-
-        // Use the random post as a new quote
-        const simulatedQuote = {
-            text: randomPost.title,
-            category: "Server"
-        };
+        // Log the result (or handle it as needed)
+        console.log("Posted quote:", result);
 
         // Check for conflicts with existing quotes
-        const existingQuoteIndex = quotes.findIndex(q => q.text === simulatedQuote.text);
+        const existingQuoteIndex = quotes.findIndex(q => q.text === quoteData.text);
 
         if (existingQuoteIndex === -1) {
             // If no conflict, add the new quote
-            quotes.push(simulatedQuote);
+            quotes.push(quoteData);
         } else {
             // If there is a conflict, overwrite the quote
-            quotes[existingQuoteIndex] = simulatedQuote;
+            quotes[existingQuoteIndex] = quoteData;
         }
 
         // Save updated quotes to local storage
@@ -358,15 +360,13 @@ async function fetchQuoteFromServer() {
         showRandomQuote(); // Display the random quote
 
     } catch (error) {
-        console.error("Error fetching quote:", error);
+        console.error("Error posting quote:", error);
     }
 }
-
 // Periodic data fetching simulation using async/await
 setInterval(async () => {
     await fetchQuoteFromServer(); // Fetch a new quote from the server every 10 seconds
 }, 10000);
-
 // Function to display a quote (either random or filtered)
 function displayQuote(quote) {
     const quoteDisplay = document.getElementById('quoteDisplay');
