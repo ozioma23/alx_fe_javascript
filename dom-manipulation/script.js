@@ -106,6 +106,91 @@ function addQuote() {
     }
 }
 
+
+// Function to export quotes as a JSON file
+
+function exportQuotesAsJSON() {
+
+    const jsonData = JSON.stringify(quotes, null, 2); // Convert the quotes array to a JSON string
+
+    
+
+    const blob = new Blob([jsonData], { type: 'application/json' }); // Create a Blob object
+
+    const url = URL.createObjectURL(blob); // Create a download link URL
+
+    
+
+    const link = document.createElement('a'); // Create an anchor element (link)
+
+    link.href = url; // Set the link's href to the Blob URL
+
+    link.download = 'quotes.json'; // Set the download file name
+
+    link.click(); // Trigger the download by simulating a click
+
+    
+
+    // Clean up the object URL
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+
+// Function to import quotes from a JSON file
+
+function importFromJsonFile(event) {
+
+    const fileReader = new FileReader();
+
+    
+
+    fileReader.onload = function(event) {
+
+        try {
+
+            const importedQuotes = JSON.parse(event.target.result); // Parse the uploaded JSON file
+
+            
+
+            // Validate the structure of the imported data (ensure it's an array of quotes)
+
+            if (Array.isArray(importedQuotes)) {
+
+                quotes.push(...importedQuotes); // Add imported quotes to the current quotes array
+
+                saveQuotes(); // Save updated quotes to local storage
+
+                showRandomQuote(); // Optionally, display a random quote after import
+
+                
+
+                alert('Quotes imported successfully!');
+
+                populateCategories(); // Re-populate categories after import
+
+            } else {
+
+                alert('The uploaded file is not a valid quotes JSON file.');
+
+            }
+
+        } catch (error) {
+
+            alert('Error parsing the JSON file. Please ensure it is a valid JSON file.');
+
+        }
+
+    };
+
+    
+
+    fileReader.readAsText(event.target.files[0]); // Read the file as text
+
+}
+
 // Function to display a notification
 function showNotification(message, type) {
     const notificationContainer = document.getElementById('notificationContainer');
