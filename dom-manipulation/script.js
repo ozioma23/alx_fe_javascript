@@ -248,7 +248,7 @@ function fetchQuoteFromServer() {
     // Simulating a delay in fetching data from the server
     setTimeout(() => {
         // Simulate fetching a new quote from an external API (e.g., JSONPlaceholder)
-        const simulatedQuote = { text: "New quote fetched from server.", category: "Server" };
+        const simulatedQuote = { text: "fetchQuotesFromServer.", category: "Server" };
         
           // Check for conflicts by comparing the quote with existing ones
           const existingQuoteIndex = quotes.findIndex(q => q.text === simulatedQuote.text);
