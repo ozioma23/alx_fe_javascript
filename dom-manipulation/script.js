@@ -319,6 +319,54 @@ function filterQuotes() {
     }
 }
 
+// Function to fetch quotes from an external API (using async/await)
+async function fetchQuoteFromServer() {
+    try {
+        // Fetch data from the API
+        const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+        
+        // Check if the response is okay
+        if (!response.ok) {
+            throw new Error("Failed to fetch quotes");
+        }
+
+        // Parse the response as JSON
+        const posts = await response.json();
+
+        // Simulate a random selection of a post to display as a quote
+        const randomPost = posts[Math.floor(Math.random() * posts.length)];
+
+        // Use the random post as a new quote
+        const simulatedQuote = {
+            text: randomPost.title,
+            category: "Server"
+        };
+
+        // Check for conflicts with existing quotes
+        const existingQuoteIndex = quotes.findIndex(q => q.text === simulatedQuote.text);
+
+        if (existingQuoteIndex === -1) {
+            // If no conflict, add the new quote
+            quotes.push(simulatedQuote);
+        } else {
+            // If there is a conflict, overwrite the quote
+            quotes[existingQuoteIndex] = simulatedQuote;
+        }
+
+        // Save updated quotes to local storage
+        saveQuotesToLocalStorage();
+        showRandomQuote(); // Display the random quote
+
+    } catch (error) {
+        console.error("Error fetching quote:", error);
+    }
+}
+
+// Periodic data fetching simulation using async/await
+setInterval(async () => {
+    await fetchQuoteFromServer(); // Fetch a new quote from the server every 10 seconds
+}, 10000);
+
 // Function to display a quote (either random or filtered)
 function displayQuote(quote) {
     const quoteDisplay = document.getElementById('quoteDisplay');
